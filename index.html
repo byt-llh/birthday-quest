@@ -21,13 +21,16 @@
     border: 5px solid #fca311;
     border-radius: 15px;
     padding: 20px;
-    width: 320px;
-    height: 460px;
+    width: 360px;
+    max-width: 95vw;
+    height: 520px;
     box-shadow: 0 0 20px #fca311;
     color: #fca311;
     text-align: center;
     position: relative;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   h1 {
     margin-top: 0;
@@ -45,20 +48,26 @@
     font-family: 'Press Start 2P', cursive;
     font-size: 13px;
     padding: 14px 24px;
-    margin: 20px 0;
+    margin: 20px 0 0;
     border-radius: 15px;
     cursor: pointer;
     transition: background 0.3s ease, transform 0.2s ease;
     box-shadow: 0 5px #c48200;
   }
-  button:hover {
+  button:hover:not(:disabled) {
     background: #ffb600;
     transform: scale(1.05);
     box-shadow: 0 7px #c48200;
   }
-  button:active {
+  button:active:not(:disabled) {
     box-shadow: 0 2px #c48200;
     transform: scale(0.95);
+  }
+  button:disabled {
+    background: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
   }
   .hidden {
     display: none;
@@ -125,34 +134,123 @@
   ol {
     padding-left: 18px;
   }
+  /* Progress Bar */
+  #progress-bar {
+    height: 8px;
+    background: #444;
+    border-radius: 5px;
+    margin: 10px 0 0 0;
+    overflow: hidden;
+  }
+  #progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #fca311;
+    border-radius: 5px;
+    transition: width 0.5s ease-in-out;
+  }
+  /* Fade animation */
+  .fade-enter {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .fade-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+  .fade-exit {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .fade-exit-active {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+  /* Quiz choices styling */
+  .quiz-options {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .quiz-option {
+    background: #fca311;
+    color: #14213d;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 13px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 3px #c48200;
+    transition: background 0.3s ease;
+  }
+  .quiz-option:hover {
+    background: #ffb600;
+  }
+  .quiz-option.correct {
+    background: #4CAF50 !important;
+    color: white;
+    cursor: default;
+  }
+  .quiz-option.wrong {
+    background: #E74C3C !important;
+    color: white;
+    cursor: default;
+  }
+  /* Confetti container */
+  #confetti-canvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+  }
 </style>
 </head>
 <body>
 <div id="game-container" role="main" aria-label="Birthday Quest Game">
   <h1>🎮 Birthday Quest 🎵</h1>
+  <div id="progress-bar" aria-hidden="true">
+    <div id="progress-fill"></div>
+  </div>
   
+  <!-- Start Screen with name input -->
   <section id="start-screen" aria-hidden="false">
-    <p>Press Start to begin your quest...</p>
-    <button id="start-btn" aria-label="Start the birthday quest">Press Start</button>
+    <p>Enter your name to start your quest...</p>
+    <input id="player-name" type="text" maxlength="20" placeholder="Your name..." aria-label="Enter your name" />
+    <button id="start-btn" aria-label="Start the birthday quest" disabled>Press Start</button>
   </section>
 
+  <!-- Level 1 Quiz -->
   <section id="level-1" class="hidden" aria-hidden="true">
     <div class="level-title">Level 1: The Memory</div>
-    <p class="reason">This is the first moment I knew you were different.</p>
-    <img src="YOUR_FIRST_MEMORY_IMAGE_URL" alt="Special memory picture" class="memory-pic" tabindex="0" />
-    <button id="to-level-2" aria-label="Go to next level">Next Level</button>
+    <p class="reason" id="memory-text">This is the first moment I knew you were different.</p>
+    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=180&q=80" alt="Special memory picture" class="memory-pic" tabindex="0" />
+    <div class="quiz-options" role="list" aria-label="Memory quiz options">
+      <div class="quiz-option" tabindex="0" data-correct="false">At the park</div>
+      <div class="quiz-option" tabindex="0" data-correct="true">At the coffee shop</div>
+      <div class="quiz-option" tabindex="0" data-correct="false">At a concert</div>
+      <div class="quiz-option" tabindex="0" data-correct="false">At the library</div>
+    </div>
+    <button id="to-level-2" aria-label="Go to next level" disabled>Next Level</button>
   </section>
 
+  <!-- Level 2 Song -->
   <section id="level-2" class="hidden" aria-hidden="true">
     <div class="level-title">Level 2: The Song</div>
     <p class="reason">If I could play one song for you right now, it would be this.</p>
     <audio controls id="birthday-song" aria-label="Birthday song">
-      <source src="YOUR_SONG_MP3_URL" type="audio/mpeg" />
+      <source src="https://cdn.pixabay.com/download/audio/2022/03/24/audio_f47099ab57.mp3?filename=happy-upbeat-pop-13911.mp3" type="audio/mpeg" />
       Your browser does not support the audio element.
     </audio>
     <button id="to-level-3" aria-label="Go to next level">Next Level</button>
   </section>
 
+  <!-- Level 3 Final Gift -->
   <section id="level-3" class="hidden" aria-hidden="true">
     <div class="level-title">Level 3: The Final Gift</div>
     <p class="reason">You’ve unlocked the ultimate reward…</p>
@@ -162,6 +260,7 @@
     <button id="show-reasons-btn" aria-label="Open your Jar of Reasons">Open Your Jar of Reasons</button>
   </section>
 
+  <!-- Reasons Screen -->
   <section id="reasons-screen" class="hidden" aria-hidden="true">
     <h2 style="text-align:center; color:#fde74c;">10 Reasons Why You're My Favorite Player</h2>
     <ol>
@@ -176,12 +275,15 @@
       <li>You’re my safe place, no matter where you are.</li>
       <li>I love the “us” we’ve built, and I can’t wait for what’s next.</li>
     </ol>
-    <p style="text-align:center; margin-top: 20px; font-weight: bold;">Happy Birthday, Player 1! 💙</p>
+    <p style="text-align:center; margin-top: 20px; font-weight: bold;">Happy Birthday, <span id="final-name"></span>! 💙</p>
   </section>
+
+  <canvas id="confetti-canvas"></canvas>
 </div>
 
 <script>
   const startBtn = document.getElementById('start-btn');
+  const playerNameInput = document.getElementById('player-name');
   const startScreen = document.getElementById('start-screen');
   const level1 = document.getElementById('level-1');
   const level2 = document.getElementById('level-2');
@@ -190,25 +292,164 @@
   const toLevel2Btn = document.getElementById('to-level-2');
   const toLevel3Btn = document.getElementById('to-level-3');
   const showReasonsBtn = document.getElementById('show-reasons-btn');
+  const quizOptions = level1.querySelectorAll('.quiz-option');
+  const progressFill = document.getElementById('progress-fill');
+  const finalNameSpan = document.getElementById('final-name');
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
   
-  function switchScreen(hideScreen, showScreen) {
-    hideScreen.classList.add('hidden');
-    hideScreen.setAttribute('aria-hidden', 'true');
-    showScreen.classList.remove('hidden');
-    showScreen.setAttribute('aria-hidden', 'false');
+  let playerName = '';
+  let currentLevel = 0; // 0-start, 1,2,3,4-reasons
+  
+  // Enable start button only if name entered
+  playerNameInput.addEventListener('input', () => {
+    startBtn.disabled = playerNameInput.value.trim().length === 0;
+  });
+  
+  function updateProgress(level) {
+    // 4 levels total, fill in % accordingly
+    const percent = (level / 4) * 100;
+    progressFill.style.width = percent + '%';
+  }
+  
+  function fadeOutIn(hideElem, showElem) {
+    hideElem.style.transition = 'opacity 0.4s ease';
+    hideElem.style.opacity = 0;
+    setTimeout(() => {
+      hideElem.classList.add('hidden');
+      hideElem.setAttribute('aria-hidden', 'true');
+      showElem.classList.remove('hidden');
+      showElem.setAttribute('aria-hidden', 'false');
+      showElem.style.opacity = 0;
+      setTimeout(() => {
+        showElem.style.transition = 'opacity 0.4s ease';
+        showElem.style.opacity = 1;
+      }, 10);
+    }, 400);
+  }
+  
+  function switchScreen(hideScreen, showScreen, level) {
+    fadeOutIn(hideScreen, showScreen);
+    currentLevel = level;
+    updateProgress(level);
   }
   
   startBtn.addEventListener('click', () => {
-    switchScreen(startScreen, level1);
+    playerName = playerNameInput.value.trim();
+    if (!playerName) return;
+    // Personalize welcome message on Level 1
+    document.getElementById('memory-text').textContent = `Hey ${playerName}, this is the first moment I knew you were different.`;
+    finalNameSpan.textContent = playerName;
+    switchScreen(startScreen, level1, 1);
   });
+  
+  // Quiz logic for level 1
+  quizOptions.forEach(option => {
+    option.addEventListener('click', () => {
+      if (toLevel2Btn.disabled === false) return; // already answered right
+      const isCorrect = option.dataset.correct === "true";
+      quizOptions.forEach(opt => {
+        opt.classList.add('disabled');
+        opt.style.pointerEvents = 'none';
+      });
+      if (isCorrect) {
+        option.classList.add('correct');
+        toLevel2Btn.disabled = false;
+        // Nice message
+        document.getElementById('memory-text').textContent = `Correct! We first met at the coffee shop ☕️. Ready for the next level?`;
+      } else {
+        option.classList.add('wrong');
+        document.getElementById('memory-text').textContent = `Oops! Not quite. Try again or click the correct answer 😉.`;
+        // Re-enable after 1.5 sec so they can retry
+        setTimeout(() => {
+          quizOptions.forEach(opt => {
+            opt.classList.remove('disabled', 'wrong', 'correct');
+            opt.style.pointerEvents = 'auto';
+          });
+          document.getElementById('memory-text').textContent = `Hey ${playerName}, this is the first moment I knew you were different.`;
+        }, 1500);
+      }
+    });
+  });
+  
   toLevel2Btn.addEventListener('click', () => {
-    switchScreen(level1, level2);
+    switchScreen(level1, level2, 2);
   });
   toLevel3Btn.addEventListener('click', () => {
-    switchScreen(level2, level3);
+    switchScreen(level2, level3, 3);
   });
   showReasonsBtn.addEventListener('click', () => {
-    switchScreen(level3, reasonsScreen);
+    switchScreen(level3, reasonsScreen, 4);
+    startConfetti();
+  });
+
+  // --- Confetti animation adapted from https://codepen.io/jakob-e/pen/LYVxRyE ---
+  confettiCanvas.width = confettiCanvas.clientWidth;
+  confettiCanvas.height = confettiCanvas.clientHeight;
+
+  const confettiPieces = [];
+  const colors = ['#fca311', '#fde74c', '#ff3366', '#5bc0eb'];
+
+  function randomRange(min, max) {
+    return Math.random() * (max - min) + min;
+  }
+
+  function createConfetti() {
+    for (let i = 0; i < 100; i++) {
+      confettiPieces.push({
+        x: randomRange(0, confettiCanvas.width),
+        y: randomRange(-confettiCanvas.height, 0),
+        rotation: randomRange(0, 360),
+        size: randomRange(7, 12),
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedY: randomRange(1, 3),
+        rotationSpeed: randomRange(-5, 5),
+      });
+    }
+  }
+
+  function drawConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confettiPieces.forEach(p => {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.4);
+      ctx.restore();
+
+      p.y += p.speedY;
+      p.rotation += p.rotationSpeed;
+
+      if (p.y > confettiCanvas.height) {
+        p.x = randomRange(0, confettiCanvas.width);
+        p.y = randomRange(-confettiCanvas.height, 0);
+      }
+    });
+  }
+
+  let confettiAnimationId;
+
+  function startConfetti() {
+    createConfetti();
+    function animate() {
+      drawConfetti();
+      confettiAnimationId = requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Stop confetti after 7 seconds
+    setTimeout(() => {
+      cancelAnimationFrame(confettiAnimationId);
+      ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiPieces.length = 0;
+    }, 7000);
+  }
+
+  // Adjust canvas size on window resize
+  window.addEventListener('resize', () => {
+    confettiCanvas.width = confettiCanvas.clientWidth;
+    confettiCanvas.height = confettiCanvas.clientHeight;
   });
 </script>
 </body>
